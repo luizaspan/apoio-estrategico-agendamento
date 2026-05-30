@@ -89,7 +89,6 @@ Escreva em português do Brasil. Nunca use travessões (o caractere —); prefir
    ============================================================ */
 const NAV = [
   { id: "consulta", label: "Consulta", group: "Atender" },
-  { id: "simulacao", label: "Treinar", group: "Atender" },
   { id: "mapa", label: "Mapa do atendimento", group: "Atender" },
   { id: "guia", label: "Guia", group: "Explorar" },
   { id: "mensagens", label: "Mensagens", group: "Explorar" },
@@ -136,7 +135,6 @@ function Sidebar({ mode, setMode, counts }) {
 function TabBar({ mode, setMode }) {
   const tabs = [
     { id: "consulta", label: "Consulta" },
-    { id: "simulacao", label: "Treinar" },
     { id: "mapa", label: "Mapa" },
     { id: "guia", label: "Guia" },
     { id: "mensagens", label: "Mensagens" },
@@ -301,122 +299,6 @@ function Guia({ openScenario }) {
 }
 
 /* ============================================================
-   SIMULAÇÃO DE CASOS
-   ============================================================ */
-function Simulacao() {
-  const [persona, setPersona] = useState(null);
-  const [chat, setChat] = useState([]);
-  const [draft, setDraft] = useState("");
-  const [busy, setBusy] = useState(false);
-  const endRef = useRef(null);
-
-  useEffect(() => { if (endRef.current) endRef.current.scrollTop = endRef.current.scrollHeight; }, [chat, busy]);
-
-  function start(p) {
-    setPersona(p);
-    setChat([{ who: "client", text: p.abertura }]);
-    setDraft("");
-  }
-  function leave() { setPersona(null); setChat([]); }
-
-  async function send() {
-    const text = draft.trim();
-    if (!text || busy) return;
-    const next = [...chat, { who: "me", text }];
-    setChat(next); setDraft(""); setBusy(true);
-    try {
-      const history = next.map((m) => (m.who === "client" ? "CLIENTE" : "ATENDENTE") + ": " + m.text).join("\n");
-      const prompt = `Você está conduzindo um TREINO de atendimento para a Clínica Fernanda Cristófoli, especializada em harmonização facial. O objetivo é a atendente conseguir agendar uma AVALIAÇÃO, com naturalidade e sem pressão.
-
-O método correto tem quatro etapas: Acolher (ler o lead e responder com calor), Conectar (pergunta sobre desejo, nunca sobre defeito), Ancorar (valor com contexto antes do número, valor cheio) e Convidar (propor a avaliação). Preço quase sempre é sintoma de conexão que faltou.
-
-Erros que a atendente deve evitar e que você, como coach, deve apontar quando ocorrerem: nomear o problema antes da pessoa (rugas, flacidez); apresentar preço parcelado ou oferecer parcelamento sem ser perguntada; mandar a tabela toda; fazer perguntas técnicas que confundem (contorno ou volume); responder com frieza quem se abre com uma história; propor videochamada de surpresa; repetir a mesma pergunta.
-
-Você interpreta a CLIENTE fictícia abaixo, reagindo de forma realista à última fala da atendente. Ceda e aceite a avaliação só se a atendente conduzir bem; se ela errar, reaja como a cliente reagiria (esfria, pede só o preço, diz que vai pensar ou some).
-
-Persona: ${persona.name}, ${persona.perfil}. Humor: ${persona.humor}.
-Objetivo do treino para a atendente: ${persona.objetivo}.
-
-Conversa até agora:
-${history}
-
-Responda APENAS com JSON válido:
-{
-  "cliente": "a próxima fala da cliente, em 1 a 3 frases, no personagem",
-  "dica": "uma dica curta de coaching para a atendente, com base no método e nos erros acima",
-  "fechou": true se a cliente concordou em agendar a avaliação, senão false
-}
-Português do Brasil. Nunca use travessões (o caractere —); prefira vírgula, dois-pontos ou ponto. Escreva de forma natural e humana, sem jargão técnico ou de inteligência artificial.`;
-      const raw = await window.claude.complete({ messages: [{ role: "user", content: prompt }] });
-      const p = extractJSON(raw) || {};
-      const add = [];
-      if (p.dica) add.push({ who: "coach", text: p.dica });
-      if (p.cliente) add.push({ who: "client", text: p.cliente });
-      if (p.fechou) add.push({ who: "coach", text: "🌿 A cliente topou avançar para o agendamento. Caso conduzido com maestria. Registre o contato e ofereça dois horários." });
-      if (add.length === 0) add.push({ who: "client", text: "Hmm, deixa eu pensar um pouco mais…" });
-      setChat((c) => [...c, ...add]);
-    } catch (e) {
-      setChat((c) => [...c, { who: "coach", text: "Não consegui continuar a simulação agora. Tente enviar de novo." }]);
-    } finally { setBusy(false); }
-  }
-
-  if (persona) {
-    return (
-      <div className="canvas-inner">
-        <button className="back-link" onClick={leave}>← Escolher outra persona</button>
-        <div className="eyebrow page-eyebrow">Simulação · {persona.perfil}</div>
-        <h1 className="page-title" style={{ fontSize: 34 }}>{persona.name}</h1>
-        <p className="page-lead" style={{ marginTop: 8 }}>Objetivo: {persona.objetivo}</p>
-
-        <div className="chat" ref={endRef} style={{ maxHeight: "none" }}>
-          {chat.map((m, i) => (
-            m.who === "coach" ? (
-              <div key={i} className="coach"><b>Coach</b>{m.text}</div>
-            ) : (
-              <div key={i} className={"bubble " + m.who}>
-                <div className="who">{m.who === "client" ? persona.name : "Você"}</div>
-                {m.text}
-              </div>
-            )
-          ))}
-          {busy && <div className="coach"><b>Coach</b>A cliente está respondendo…</div>}
-        </div>
-
-        <div className="sim-compose">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Responda como atendente…"
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-          />
-          <button className="btn btn-primary" onClick={send} disabled={!draft.trim() || busy}>Enviar</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="canvas-inner">
-      <div className="eyebrow page-eyebrow">Simulação de casos</div>
-      <h1 className="page-title">Treine com<br />clientes fictícias.</h1>
-      <p className="page-lead">
-        Escolha uma persona e conduza a conversa de verdade. A cliente reage ao que você escreve, e o coach
-        comenta cada resposta. Passe o tempo que quiser ensaiando abordagens.
-      </p>
-      <div className="sim-personas">
-        {KB.personas.map((p) => (
-          <div key={p.id} className="persona-card card" onClick={() => start(p)}>
-            <div className="pname serif">{p.name}</div>
-            <div className="pperfil">{p.perfil}</div>
-            <div className="phumor">“{p.humor}”</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
    HISTÓRICO & FAVORITOS
    ============================================================ */
 function timeAgo(ts) {
@@ -545,7 +427,7 @@ function App() {
               clearSeed={() => setSeed(null)}
             />
           )}
-          {mode === "simulacao" && <Simulacao />}
+
           {mode === "mapa" && <Mapa />}
           {mode === "guia" && <Guia openScenario={openScenario} />}
           {mode === "mensagens" && <Mensagens />}
