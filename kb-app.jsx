@@ -89,6 +89,7 @@ Escreva em português do Brasil. Nunca use travessões (o caractere —); prefir
    ============================================================ */
 const NAV = [
   { id: "consulta", label: "Consulta", group: "Atender" },
+  { id: "simulacao", label: "Treinar", group: "Atender" },
   { id: "mapa", label: "Mapa do atendimento", group: "Atender" },
   { id: "guia", label: "Guia", group: "Explorar" },
   { id: "mensagens", label: "Mensagens", group: "Explorar" },
@@ -135,6 +136,7 @@ function Sidebar({ mode, setMode, counts }) {
 function TabBar({ mode, setMode }) {
   const tabs = [
     { id: "consulta", label: "Consulta" },
+    { id: "simulacao", label: "Treinar" },
     { id: "mapa", label: "Mapa" },
     { id: "guia", label: "Guia" },
     { id: "mensagens", label: "Mensagens" },
@@ -428,6 +430,7 @@ function App() {
             />
           )}
 
+          {mode === "simulacao" && <Simulacao />}
           {mode === "mapa" && <Mapa />}
           {mode === "guia" && <Guia openScenario={openScenario} />}
           {mode === "mensagens" && <Mensagens />}
