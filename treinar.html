@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Treinar · Apoio Estratégico de Agendamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --paper:#F2ECDF;--paper-2:#FBF7EF;--paper-3:#F5EFE3;
+  --ink:#33282A;--ink-2:#766860;--ink-3:#A89A8C;
+  --gold:#AE8A52;--gold-soft:rgba(174,138,82,.15);--gold-line:rgba(174,138,82,.32);
+  --crystal:#C58D88;--crystal-soft:#ECD8D3;--crystal-deep:#9E6B68;
+  --wine:#5A2E38;--wine-2:#74404A;
+  --line:rgba(44,37,33,.12);--line-soft:rgba(44,37,33,.07);
+  --shadow:0 1px 2px rgba(44,37,33,.04),0 14px 40px -22px rgba(44,37,33,.35);
+  --shadow-lg:0 2px 6px rgba(44,37,33,.05),0 30px 70px -30px rgba(44,37,33,.45);
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:"Jost",-apple-system,BlinkMacSystemFont,sans-serif;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--sans);color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+
+/* layout */
+.wrap{max-width:720px;margin:0 auto;padding:48px 24px 120px;}
+
+/* header */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
+.gem{width:38px;height:38px;flex:none;border-radius:50%;
+  background:radial-gradient(120% 120% at 34% 28%,#fff 0%,var(--crystal-soft) 34%,var(--crystal) 72%,var(--crystal-deep) 100%);
+  box-shadow:inset 0 1px 3px rgba(255,255,255,.85),inset 0 -5px 12px rgba(158,107,104,.3),0 4px 12px -5px rgba(158,107,104,.5);
+  border:1px solid var(--gold-line);}
+.brand-name{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.1;}
+.brand-sub{font-size:9.5px;text-transform:uppercase;letter-spacing:.24em;color:var(--gold);margin-top:2px;}
+
+/* eyebrow / titles */
+.eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.32em;font-weight:500;color:var(--gold);margin-bottom:12px;}
+.page-title{font-family:var(--serif);font-size:clamp(32px,5vw,48px);font-weight:500;line-height:1.06;letter-spacing:-.01em;}
+.page-lead{color:var(--ink-2);font-size:15.5px;max-width:54ch;margin-top:12px;line-height:1.6;}
+
+/* persona grid */
+.personas{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px;}
+.persona-card{padding:22px;border-radius:var(--radius);background:var(--paper-2);border:1px solid var(--line);
+  box-shadow:var(--shadow);cursor:pointer;transition:transform .16s,box-shadow .16s,border-color .16s;}
+.persona-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--gold-line);}
+.pname{font-family:var(--serif);font-size:23px;font-weight:600;line-height:1.15;color:var(--ink);}
+.pperfil{color:var(--wine);font-size:12.5px;letter-spacing:.02em;margin:5px 0 9px;line-height:1.4;}
+.phumor{color:var(--ink-2);font-size:13.5px;font-style:italic;font-family:var(--serif);line-height:1.45;}
+.ptag{margin-top:14px;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.14em;}
+
+/* chat screen */
+#chat-screen{display:none;}
+.back-link{display:inline-flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;
+  color:var(--ink-2);font-family:var(--sans);font-size:13px;letter-spacing:.04em;margin-bottom:22px;padding:0;transition:color .14s;}
+.back-link:hover{color:var(--ink);}
+.persona-header{margin-bottom:24px;}
+.persona-header .pname{font-size:30px;}
+
+/* score bar */
+.score-bar{display:flex;align-items:center;gap:12px;margin-top:16px;}
+.score-label{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-3);}
+.score-track{flex:1;height:5px;background:var(--line);border-radius:999px;overflow:hidden;}
+.score-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--crystal),var(--gold));transition:width .6s ease;}
+.score-val{font-family:var(--serif);font-size:17px;color:var(--gold);font-weight:600;width:36px;text-align:right;}
+
+/* objective chip */
+.obj-chip{display:inline-flex;align-items:center;gap:9px;background:var(--gold-soft);border:1px solid var(--gold-line);
+  border-radius:999px;padding:8px 16px 8px 12px;font-size:12.5px;color:var(--ink-2);margin-top:12px;line-height:1.45;}
+.obj-chip b{color:var(--ink);font-weight:500;}
+
+/* messages */
+.chat-area{display:flex;flex-direction:column;gap:12px;margin:24px 0 20px;min-height:80px;}
+.bubble{max-width:80%;padding:13px 17px;border-radius:18px;font-size:14.5px;line-height:1.55;}
+.bubble.client{align-self:flex-start;background:var(--paper-2);border:1px solid var(--line);border-bottom-left-radius:5px;color:var(--ink);}
+.bubble.me{align-self:flex-end;background:var(--ink);color:var(--paper-2);border-bottom-right-radius:5px;}
+.bubble .who{font-size:9.5px;text-transform:uppercase;letter-spacing:.2em;opacity:.5;margin-bottom:5px;}
+.coach-bubble{align-self:center;max-width:92%;background:var(--gold-soft);border:1px solid var(--gold-line);
+  border-radius:14px;padding:12px 17px;font-size:13px;color:var(--ink);font-style:italic;font-family:var(--serif);line-height:1.5;}
+.coach-bubble strong{font-style:normal;font-family:var(--sans);text-transform:uppercase;letter-spacing:.16em;
+  font-size:10px;font-weight:500;color:var(--gold);display:block;margin-bottom:4px;}
+.coach-bubble.bad{background:rgba(90,46,56,.07);border-color:rgba(90,46,56,.22);}
+.coach-bubble.bad strong{color:var(--wine);}
+.coach-bubble.great{background:rgba(174,138,82,.12);border-color:rgba(174,138,82,.35);}
+
+/* result card */
+.result-card{background:var(--paper-2);border:1px solid var(--gold-line);border-radius:var(--radius);
+  padding:28px 28px 24px;box-shadow:var(--shadow-lg);margin-top:8px;}
+.result-title{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.1;margin-bottom:8px;}
+.result-title.won{color:var(--wine);}
+.result-title.lost{color:var(--ink-2);}
+.result-text{color:var(--ink-2);font-size:14.5px;line-height:1.65;margin-top:6px;}
+.result-score{font-family:var(--serif);font-size:48px;color:var(--gold);font-weight:600;line-height:1;margin:16px 0 4px;}
+.result-sub{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-3);}
+.result-erros{margin-top:20px;}
+.result-erros h4{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--wine);margin-bottom:10px;}
+.result-erros li{font-size:14px;line-height:1.6;color:var(--ink-2);margin-bottom:6px;padding-left:16px;position:relative;}
+.result-erros li::before{content:"·";position:absolute;left:4px;color:var(--wine);}
+
+/* compose */
+.compose-wrap{background:var(--paper-2);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);padding:18px 18px 13px;transition:border-color .2s,box-shadow .2s;}
+.compose-wrap:focus-within{border-color:var(--gold-line);box-shadow:var(--shadow-lg);}
+.compose-ta{width:100%;border:none;outline:none;background:none;resize:none;
+  font-family:var(--serif);font-size:20px;line-height:1.45;color:var(--ink);min-height:62px;}
+.compose-ta::placeholder{color:var(--ink-3);font-style:italic;}
+.compose-bar{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line-soft);}
+.compose-hint{font-size:11.5px;color:var(--ink-3);}
+.btn{font-family:var(--sans);font-weight:500;letter-spacing:.04em;cursor:pointer;border:none;
+  border-radius:999px;padding:11px 22px;font-size:13px;transition:transform .12s,background .18s;
+  display:inline-flex;align-items:center;gap:8px;}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--ink);color:var(--paper-2);}
+.btn-primary:hover{background:var(--wine);}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line);}
+.btn-ghost:hover{border-color:var(--gold-line);color:var(--ink);}
+.btn[disabled]{opacity:.4;cursor:not-allowed;}
+
+.rule{border:none;border-top:1px solid var(--gold-line);margin:28px 0;}
+
+@media(max-width:600px){
+  .personas{grid-template-columns:1fr;}
+  .wrap{padding:32px 16px 100px;}
+  .bubble{max-width:88%;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="gem"></div>
+    <div>
+      <div class="brand-name">Apoio Estratégico</div>
+      <div class="brand-sub">Simulação de Atendimento</div>
+    </div>
+  </div>
+
+  <!-- TELA DE PERSONAS -->
+  <div id="persona-screen">
+    <div class="eyebrow">Simulação de casos</div>
+    <h1 class="page-title">Treine com<br>clientes fictícias.</h1>
+    <p class="page-lead">Escolha uma persona e conduza a conversa de verdade. A cliente reage ao que você escreve e o coach comenta cada resposta.</p>
+    <div class="personas" id="personas-grid"></div>
+  </div>
+
+  <!-- TELA DE CHAT -->
+  <div id="chat-screen">
+    <button class="back-link" id="btn-back">← Escolher outra persona</button>
+    <div class="persona-header">
+      <div class="eyebrow" id="chat-eyebrow"></div>
+      <div class="pname serif" id="chat-name"></div>
+      <div class="phumor" id="chat-humor" style="margin-top:6px;"></div>
+      <div class="obj-chip" id="chat-obj"></div>
+      <div class="score-bar" style="margin-top:16px;">
+        <span class="score-label">Condução</span>
+        <div class="score-track"><div class="score-fill" id="score-fill" style="width:50%"></div></div>
+        <span class="score-val" id="score-val">50</span>
+      </div>
+    </div>
+
+    <hr class="rule">
+
+    <div class="chat-area" id="chat-area"></div>
+
+    <div id="compose-area">
+      <div class="compose-wrap">
+        <textarea class="compose-ta" id="compose-ta" placeholder="Escreva sua resposta para a cliente…" rows="3"></textarea>
+        <div class="compose-bar">
+          <span class="compose-hint">Enter para nova linha · Ctrl+Enter para enviar</span>
+          <button class="btn btn-primary" id="btn-send">Enviar →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DADOS: PERSONAS E ÁRVORES DE CONVERSA
+   ============================================================ */
+
+const PERSONAS = [
+  {
+    id: "mayara",
+    name: "Mayara",
+    perfil: "Procedimento específico · preenchimento labial",
+    humor: '"Veio no impulso, sem vocabulário técnico"',
+    objetivo: "Ancorar o valor com contexto e convidar para a avaliação. Sem termos técnicos como contorno ou volume.",
+    abertura: "Oii quanto está o preenchimento labial?",
+    turns: [
+      {
+        // turno 1: resposta da atendente após abertura
+        clienteGood: "Nossa que lindo saber! Como funciona essa avaliação? Posso ir essa semana?",
+        clienteBad: "Hm, vi em outra clínica por R$ 1.200. Precisa mesmo fazer avaliação?",
+        coachGood: "Perfeito. Você ancorô o valor no processo da Dra. antes do número. A Mayara aqueceu.",
+        coachBad: "Cuidado: dar o preço sem contexto vira comparação. Faltou conectar o valor ao diferencial antes do número.",
+        detectGood: ["avaliação","avalia","processo","dra","diferente","natural","personaliz","antes de aplicar","antes de qualquer","como ela trabalha"],
+        detectBad: ["parcelar","parcelado","parcelas","contorno","volume","tabela","outros procedimentos","preço especial"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Ah, faz sentido! Tenho disponibilidade na quinta de manhã. Como agendo?",
+        clienteBad: "Hmm, mas você não me disse o preço ainda, não quero gastar viagem.",
+        coachGood: "Ótimo! Você usou a escolha simples (manhã ou tarde) e ela aceitou. Muito bem.",
+        coachBad: "A escolha simples ainda não veio. Quando a cliente pergunta o preço de novo, é sinal que faltou o convite com opção.",
+        detectGood: ["manhã","tarde","preferir","prefere","semana","horário","como agend","quinta","sexta","quando","agendar"],
+        detectBad: ["parcelamento","mais barato","desconto","planeja","talvez","quando tiver","pensa"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Perfeito! Me manda o endereço?",
+        clienteBad: "Ok, mas ainda não sei se vou conseguir. Vou pensar e te falo.",
+        coachGood: "Excelente condução! Você confirmou o horário e ela pediu o endereço — conversa convertida.",
+        coachBad: "Ela saiu com 'vou pensar'. Quando isso acontece, pergunte com leveza: foi uma questão de momento ou ficou alguma dúvida?",
+        detectGood: ["endereço","confirmar","confirmado","anota","anotei","perfeito","combinado","até"],
+        detectBad: ["planejo","qualquer coisa","se eu conseguir"],
+        detectNeutral: [],
+        finaliza: true,
+      },
+    ],
+    errosComuns: [
+      "Apresentar o preço parcelado sem ser perguntada",
+      "Usar termos técnicos: contorno, volume, ácido",
+      "Dar a tabela de procedimentos sem ser pedida",
+      "Não convidar para a avaliação com uma escolha simples",
+    ],
+  },
+  {
+    id: "melissa",
+    name: "Melissa",
+    perfil: "Lead com história · pós-emagrecimento",
+    humor: '"Quer ser vista antes de ser atendida"',
+    objetivo: "Acolher a jornada antes de qualquer pergunta clínica. Um procedimento de entrada, nunca a tabela.",
+    abertura: "Tive um emagrecimento muito grande e senti que meu rosto mudou, está com aspecto de derretimento. Queria saber o investimento para bioestimulador, botox e ácido hialurônico.",
+    turns: [
+      {
+        clienteGood: "Exatamente isso. É difícil olhar no espelho e não me reconhecer, sabe? Já fiz botox uma vez, mas foi tudo muito impreciso.",
+        clienteBad: "Hm, mas quanto custa cada um? Preciso calcular antes de qualquer coisa.",
+        coachGood: "Você reconheceu a jornada antes de qualquer informação clínica. Ela se abriu — é o sinal que esperava.",
+        coachBad: "Ela veio com uma história pesada e você foi direto para procedimento ou preço. Isso fecha. Primeiro: 'posso imaginar a jornada que está sendo pra você'.",
+        detectGood: ["imagino","jornada","entendo","que bonita","que conquista","parabéns","mudança","transformação","se reconhece","se ver","me conta","experiência anterior","fez antes"],
+        detectBad: ["bioestimulador custa","botox custa","ácido custa","valor de cada","preço de cada","tabela","parcela","quanto fica tudo"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Nossa, gostei muito dessa abordagem. Quando posso agendar a avaliação?",
+        clienteBad: "Mas se eu fizer tudo isso vai passar de R$ 5.000, não é? Não sei se tenho isso agora.",
+        coachGood: "Ótimo. Você apresentou o bioestimulador como ponto de entrada, sem somar tudo. Ela não recuou.",
+        coachBad: "Quando ela somou tudo e recuou, era hora de apresentar só um procedimento de entrada — o bioestimulador — e dizer que o resto a Dra. avalia depois.",
+        detectGood: ["bioestimulador","ponto de partida","entrada","a dra avalia","avaliação","não soma","um por vez","um de cada vez"],
+        detectBad: ["tudo junto","R$ 5","R$ 6","R$ 7","R$ 8","parcelas","total","soma"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Combinado! Manda o endereço e o horário disponível.",
+        clienteBad: "Vou pensar, porque envolve investimento alto. Posso te chamar depois?",
+        coachGood: "Conversa convertida. Ela pediu o endereço. Você conduziu com empatia e uma entrada clara.",
+        coachBad: "Ela saiu com 'vou pensar'. Não encerre. Pergunte: foi momento ou ficou alguma dúvida? Peça permissão para retomar.",
+        detectGood: ["avaliação","semana","horário","manhã","tarde","agendar","quando","combinar"],
+        detectBad: [],
+        detectNeutral: [],
+        finaliza: true,
+      },
+    ],
+    errosComuns: [
+      "Ir direto ao preço sem acolher a jornada",
+      "Somar todos os procedimentos (passa de R$ 5.000 e ela recua)",
+      "Fazer perguntas clínicas antes de criar conexão",
+      "Não apresentar um procedimento de entrada claro",
+    ],
+  },
+  {
+    id: "karolina",
+    name: "Karolina",
+    perfil: "Pesquisando botox para a mãe",
+    humor: '"Objetiva, pergunta o preço direto"',
+    objetivo: "Descobrir que é para a mãe, valorizar o cuidado, ancorar o preço cheio sem parcelar.",
+    abertura: "Bom dia! Qual o valor da consulta para botox?",
+    turns: [
+      {
+        clienteGood: "Ah, que legal! Sim, é para minha mãe, ela nunca fez antes. Que diferencial bonito esse de avaliar antes.",
+        clienteBad: "Mas é uma consulta paga? Não é o tratamento, só uma avaliação?",
+        coachGood: "Você ancorô o valor e abriu espaço para ela contar que é para outra pessoa. Ótimo.",
+        coachBad: "Você não perguntou para quem é — e isso importa muito. Tente: 'é para você ou para alguém especial?'",
+        detectGood: ["para quem","para você","alguém especial","presente","pergunta","me conta","avaliação","processo","dra avalia","antes de aplicar"],
+        detectBad: ["parcelas","parcelado","consulta cobrada","R$ 1.350 em","desconto","promoção"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Que carinho perguntar isso! Ela teve uma experiência ruim antes, ficou artificial. Quero que ela confie nessa dra.",
+        clienteBad: "Quanto fica parcelado? Ela está com orçamento limitado.",
+        coachGood: "Você valorizou o gesto de pesquisar para outra pessoa e perguntou sobre a experiência anterior. Muito bem.",
+        coachBad: "Quando falou de parcelamento, a resposta correta é simples: 'Parcelamos em até 5x sem juros'. Nunca ofereça antes de ser perguntada.",
+        detectGood: ["que carinhosa","que cuidado","que gesto","experiência dela","ela fez antes","me conta mais sobre ela","já fez","ficou satisfeita"],
+        detectBad: ["R$ 270 por mês","R$ 225","parcelamos em","parcela em","pode parcelar"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Adorei! Vou passar o contato da minha mãe para vocês. Quando vocês têm horário?",
+        clienteBad: "Vou falar com ela e a gente vê. Obrigada pelas informações!",
+        coachGood: "Converteu. Ela vai passar o contato da mãe — exatamente o que você queria.",
+        coachBad: "'Obrigada pelas informações' é um sinal de saída. Na próxima vez: convide a mãe diretamente — 'ela pode falar com a gente ou você prefere que a gente entre em contato?'",
+        detectGood: ["avaliação","horário","semana","manhã","tarde","sua mãe pode","ela pode vir","como ela entra","agendar"],
+        detectBad: [],
+        detectNeutral: [],
+        finaliza: true,
+      },
+    ],
+    errosComuns: [
+      "Não descobrir que é para a mãe cedo",
+      "Oferecer parcelamento sem ser perguntada",
+      "Não valorizar o gesto de quem pesquisa por carinho",
+      "Não convidar a mãe para a avaliação diretamente",
+    ],
+  },
+  {
+    id: "anne",
+    name: "Anne",
+    perfil: "Lead genérico · veio de anúncio",
+    humor: '"Mandou mensagem no impulso, some fácil"',
+    objetivo: "Acolher e abrir espaço com uma pergunta leve sobre desejo. Nunca pergunte o que incomoda no rosto.",
+    abertura: "Olá! Tenho interesse e gostaria de mais informações.",
+    turns: [
+      {
+        clienteGood: "Que ótimo! Estava pensando em cuidar um pouco mais do rosto. Ainda não sei exatamente o quê.",
+        clienteBad: "Hm, na verdade só estava curiosa mesmo. Obrigada!",
+        coachGood: "Você abriu com pergunta sobre desejo, usou o nome e respondeu com leveza. Ela ficou.",
+        coachBad: "Perguntar 'o que te incomoda?' ou ir direto para procedimento fecha a conversa. A pergunta certa é sobre desejo: 'o que você está pensando em cuidar?'",
+        detectGood: ["o que você","o que te","pensando em cuidar","desejo","o que chamou","me conta","oi anne","olá anne","ficou feliz","prazer"],
+        detectBad: ["o que te incomoda","o que te incomoda","o que te preocupa","tabela","procedimentos","botox","preenchimento","R$","preço"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Nossa, adorei a forma que você falou! Me conta mais sobre essa avaliação.",
+        clienteBad: "Entendi, mas posso ver os preços antes? Quero ter uma ideia.",
+        coachGood: "Ela pediu mais sobre a avaliação. Você abriu espaço para conexão sem forçar procedimento.",
+        coachBad: "Quando ela pede preço antes de qualquer conexão, anchore com o processo da Dra. e dê um valor cheio — nunca a tabela toda.",
+        detectGood: ["avaliação","dra fernanda","natural","resultado","avalia antes","processo","personaliz","me conta","o que você quer"],
+        detectBad: ["tabela","todos os procedimentos","lista","opções são","oferecemos"],
+        detectNeutral: [],
+      },
+      {
+        clienteGood: "Que bacana! Vou adorar. Pode me mandar quando tiver horário disponível?",
+        clienteBad: "Legal, vou pensar. Se eu decidir te aviso.",
+        coachGood: "Ótimo! Lead convertido. Você a conquistou sem empurrar nada.",
+        coachBad: "'Vou te avisar' é sumida. Da próxima vez: 'Que tal eu te chamar assim que abrir a agenda? Pode ser?' Peça permissão para o próximo contato.",
+        detectGood: ["manhã","tarde","semana","horário","quando tiver","agendar","combinado"],
+        detectBad: [],
+        detectNeutral: [],
+        finaliza: true,
+      },
+    ],
+    errosComuns: [
+      "Perguntar o que incomoda no rosto",
+      "Ir direto para a tabela de procedimentos",
+      "Não usar o nome da pessoa",
+      "Não pedir permissão para retomar o contato quando ela sai sem agendar",
+    ],
+  },
+  {
+    id: "cirineu",
+    name: "Cirineu",
+    perfil: "Fora do perfil · procura convênio",
+    humor: '"Não conhece a clínica"',
+    objetivo: "Encerrar com gentileza em uma única mensagem, deixar a porta aberta. Não ativar o script de qualificação.",
+    abertura: "Boa tarde. Vocês atendem pelo plano SC Saúde?",
+    turns: [
+      {
+        clienteGood: "Ah entendi, obrigado pela atenção! Se um dia eu quiser fazer algo estético, lembro de vocês.",
+        clienteBad: "Ah, mas vocês têm alguma opção mais em conta? Queria cuidar de algo no rosto.",
+        coachGood: "Perfeito. Uma mensagem, gentileza e porta aberta. Sem qualificação, sem desgaste.",
+        coachBad: "Ativou o script de qualificação ou tentou converter — isso gasta energia com quem não é do perfil. Uma mensagem gentil de encerramento basta.",
+        detectGood: ["não atendemos","particular","harmonização","se um dia","à disposição","obrigada","não atende convênio"],
+        detectBad: ["mas posso","podemos oferecer","tem como","mas existe","opção mais","desconto","promoção","procedimento mais simples"],
+        detectNeutral: [],
+        finaliza: true,
+      },
+    ],
+    errosComuns: [
+      "Tentar converter quem é fora do perfil",
+      "Ativar o script de qualificação",
+      "Mandar mais de uma mensagem de encerramento",
+      "Não deixar a porta aberta com leveza",
+    ],
+  },
+];
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let currentPersona = null;
+let turnIndex = 0;
+let score = 50;
+let erros = [];
+let ended = false;
+
+/* ============================================================
+   RENDER: GRID DE PERSONAS
+   ============================================================ */
+function renderPersonas() {
+  const grid = document.getElementById("personas-grid");
+  grid.innerHTML = "";
+  PERSONAS.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "persona-card";
+    el.innerHTML = `
+      <div class="pname">${p.name}</div>
+      <div class="pperfil">${p.perfil}</div>
+      <div class="phumor">${p.humor}</div>
+      <div class="ptag">Clique para começar →</div>
+    `;
+    el.addEventListener("click", () => startPersona(p));
+    grid.appendChild(el);
+  });
+}
+
+/* ============================================================
+   INICIAR PERSONA
+   ============================================================ */
+function startPersona(p) {
+  currentPersona = p;
+  turnIndex = 0;
+  score = 50;
+  erros = [];
+  ended = false;
+
+  document.getElementById("persona-screen").style.display = "none";
+  document.getElementById("chat-screen").style.display = "block";
+  document.getElementById("chat-eyebrow").textContent = "Simulação · " + p.perfil;
+  document.getElementById("chat-name").textContent = p.name;
+  document.getElementById("chat-humor").textContent = p.humor;
+  document.getElementById("chat-obj").innerHTML = `<b>Objetivo:</b> ${p.objetivo}`;
+  document.getElementById("chat-area").innerHTML = "";
+  document.getElementById("compose-area").style.display = "block";
+  document.getElementById("compose-ta").value = "";
+  setScore(50);
+
+  addBubble("client", p.name, p.abertura);
+  document.getElementById("compose-ta").focus();
+}
+
+/* ============================================================
+   ENVIAR RESPOSTA
+   ============================================================ */
+function send() {
+  if (ended) return;
+  const ta = document.getElementById("compose-ta");
+  const text = ta.value.trim();
+  if (!text) return;
+  ta.value = "";
+  ta.style.height = "";
+
+  addBubble("me", "Você", text);
+
+  const turn = currentPersona.turns[turnIndex];
+  const lower = text.toLowerCase();
+
+  const isGood = turn.detectGood.some(kw => lower.includes(kw));
+  const isBad  = turn.detectBad.some(kw => lower.includes(kw));
+
+  let outcome;
+  if (isGood && !isBad) {
+    outcome = "good";
+    score = Math.min(100, score + 18);
+  } else if (isBad) {
+    outcome = "bad";
+    score = Math.max(0, score - 22);
+    erros.push(turn.coachBad);
+  } else {
+    outcome = "neutral";
+    score = Math.max(0, score - 6);
+  }
+
+  setScore(score);
+
+  setTimeout(() => {
+    const clienteText = outcome === "good" ? turn.clienteGood : turn.clienteBad;
+    const coachText   = outcome === "good" ? turn.coachGood   : turn.coachBad;
+    const coachClass  = outcome === "good" ? "great" : "bad";
+
+    addBubble("client", currentPersona.name, clienteText);
+    setTimeout(() => {
+      addCoach(coachText, coachClass);
+      turnIndex++;
+
+      if (turn.finaliza || turnIndex >= currentPersona.turns.length) {
+        setTimeout(() => showResult(), 900);
+      }
+    }, 500);
+  }, 700);
+}
+
+/* ============================================================
+   RESULTADO FINAL
+   ============================================================ */
+function showResult() {
+  ended = true;
+  document.getElementById("compose-area").style.display = "none";
+
+  const won = score >= 60;
+  const area = document.getElementById("chat-area");
+
+  const card = document.createElement("div");
+  card.className = "result-card";
+
+  let errosHtml = "";
+  if (erros.length > 0) {
+    errosHtml = `<div class="result-erros"><h4>Pontos para revisar</h4><ul>${erros.map(e => `<li>${e}</li>`).join("")}</ul></div>`;
+  }
+
+  const errosComunsHtml = `<div class="result-erros" style="margin-top:16px;"><h4>Erros mais comuns nessa persona</h4><ul>${currentPersona.errosComuns.map(e=>`<li>${e}</li>`).join("")}</ul></div>`;
+
+  card.innerHTML = `
+    <div class="result-title ${won ? 'won' : 'lost'}">${won ? "Avaliação agendada." : "Ela saiu sem agendar."}</div>
+    <div class="result-score">${score}</div>
+    <div class="result-sub">pontos de condução</div>
+    <p class="result-text" style="margin-top:14px;">${won
+      ? "Você conduziu bem: acolheu, ancorô o valor e convidou com clareza. A cliente entrou no processo."
+      : "A conversa não converteu desta vez. Revise os pontos abaixo e tente de novo com outra abordagem."
+    }</p>
+    ${errosHtml}
+    ${errosComunsHtml}
+    <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="startPersona(currentPersona)">Tentar de novo</button>
+      <button class="btn btn-ghost" onclick="goBack()">Outras personas</button>
+    </div>
+  `;
+
+  area.appendChild(card);
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function addBubble(who, name, text) {
+  const area = document.getElementById("chat-area");
+  const div = document.createElement("div");
+  div.className = "bubble " + who;
+  div.innerHTML = `<div class="who">${name}</div>${escHtml(text)}`;
+  area.appendChild(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function addCoach(text, cls) {
+  const area = document.getElementById("chat-area");
+  const div = document.createElement("div");
+  div.className = "coach-bubble " + (cls || "");
+  div.innerHTML = `<strong>Coach</strong>${escHtml(text)}`;
+  area.appendChild(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function setScore(val) {
+  document.getElementById("score-fill").style.width = val + "%";
+  document.getElementById("score-val").textContent = val;
+}
+
+function goBack() {
+  document.getElementById("chat-screen").style.display = "none";
+  document.getElementById("persona-screen").style.display = "block";
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+document.getElementById("btn-back").addEventListener("click", goBack);
+document.getElementById("btn-send").addEventListener("click", send);
+document.getElementById("compose-ta").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); send(); }
+  // auto-resize
+  setTimeout(() => {
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  }, 0);
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderPersonas();
+</script>
+</body>
+</html>
