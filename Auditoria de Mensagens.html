@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auditoria de Mensagens — Clínica Dra. Fernanda Cristófoli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#F2ECDF;
+  --paper-2:#FBF7EF;
+  --paper-3:#F5EFE3;
+  --ink:#33282A;
+  --ink-2:#766860;
+  --ink-3:#A89A8C;
+  --gold:#AE8A52;
+  --gold-soft:rgba(174,138,82,.15);
+  --gold-line:rgba(174,138,82,.32);
+  --crystal:#C58D88;
+  --crystal-soft:#ECD8D3;
+  --crystal-deep:#9E6B68;
+  --sage:#94A085;
+  --wine:#5A2E38;
+  --wine-2:#74404A;
+  --line:rgba(44,37,33,.12);
+  --line-soft:rgba(44,37,33,.07);
+  --shadow:0 1px 2px rgba(44,37,33,.04),0 14px 40px -22px rgba(44,37,33,.35);
+  --shadow-lg:0 2px 6px rgba(44,37,33,.05),0 30px 70px -30px rgba(44,37,33,.45);
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:"Jost",-apple-system,BlinkMacSystemFont,sans-serif;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--paper);
+  font-weight:400;-webkit-font-smoothing:antialiased;line-height:1.55;
+  min-height:100%;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+.serif{font-family:var(--serif)}
+.eyebrow{text-transform:uppercase;letter-spacing:.32em;font-size:11px;font-weight:500;color:var(--gold)}
+
+.wrap{max-width:880px;margin:0 auto;padding:64px 40px 130px;}
+
+/* ---- header ---- */
+.brand{display:flex;align-items:center;gap:13px;margin-bottom:46px;}
+.gem{
+  width:38px;height:38px;flex:none;border-radius:50%;
+  background:radial-gradient(120% 120% at 34% 28%, #fff 0%, var(--crystal-soft) 34%, var(--crystal) 72%, var(--crystal-deep) 100%);
+  box-shadow:inset 0 1px 3px rgba(255,255,255,.85),inset 0 -5px 12px rgba(158,107,104,.3),0 4px 12px -5px rgba(158,107,104,.5);
+  border:1px solid var(--gold-line);position:relative;
+}
+.gem::after{content:"";position:absolute;inset:23%;border-radius:50%;background:radial-gradient(circle at 40% 38%, rgba(255,255,255,.65), transparent 62%);}
+.brand-name{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.05;}
+.brand-sub{font-size:9.5px;text-transform:uppercase;letter-spacing:.24em;color:var(--gold);margin-top:3px;}
+
+.title{font-family:var(--serif);font-weight:500;font-size:clamp(38px,6vw,58px);line-height:1.04;letter-spacing:-.012em;margin-top:14px;}
+.lead{color:var(--ink-2);font-size:17px;max-width:60ch;margin-top:20px;text-wrap:pretty;}
+.lead b{color:var(--ink);font-weight:500;}
+
+/* diagnosis quote */
+.diag{font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.5;color:var(--ink);margin-top:30px;padding-left:22px;border-left:2px solid var(--gold-line);max-width:56ch;text-wrap:pretty;}
+
+/* ---- summary tiles ---- */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:42px;}
+.tile{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:20px 18px;position:relative;overflow:hidden;}
+.tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;}
+.tile.t-crit::before{background:var(--wine);}
+.tile.t-inc::before{background:var(--gold);}
+.tile.t-risk::before{background:var(--crystal-deep);}
+.tile.t-tone::before{background:var(--sage);}
+.tile .num{font-family:var(--serif);font-size:42px;line-height:1;color:var(--ink);font-weight:500;}
+.tile .lab{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--ink-2);margin-top:9px;line-height:1.4;}
+
+/* ---- section rule ---- */
+.sec-head{display:flex;align-items:baseline;gap:16px;margin:62px 0 8px;}
+.sec-num{font-family:var(--serif);font-size:20px;color:var(--gold);font-style:italic;flex:none;}
+.sec-title{font-family:var(--serif);font-size:31px;font-weight:500;line-height:1.1;letter-spacing:-.01em;}
+.sec-lead{color:var(--ink-2);font-size:15px;max-width:62ch;margin:0 0 4px 36px;text-wrap:pretty;}
+
+/* ---- finding card ---- */
+.find{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:26px 28px;margin-top:18px;position:relative;}
+.find-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+.tag{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:500;padding:5px 11px;border-radius:999px;white-space:nowrap;}
+.tag.crit{background:var(--wine);color:#F3E4DE;}
+.tag.inc{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-line);}
+.tag.risk{background:var(--crystal-soft);color:var(--crystal-deep);}
+.tag.tone{background:rgba(148,160,133,.18);color:#5f6b50;}
+.find-where{font-size:12px;letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase;}
+.find-where b{color:var(--ink-2);font-weight:500;}
+.find h3{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.18;margin-top:10px;color:var(--ink);}
+.find p{color:var(--ink-2);font-size:15px;line-height:1.62;margin-top:11px;text-wrap:pretty;}
+.find p b{color:var(--ink);font-weight:500;}
+
+/* excerpt blocks */
+.ex{margin-top:16px;border-radius:12px;padding:15px 18px;font-size:15px;line-height:1.6;}
+.ex .ex-lab{font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:500;margin-bottom:7px;display:block;}
+.ex.bad{background:rgba(90,46,56,.055);border:1px solid rgba(90,46,56,.18);}
+.ex.bad .ex-lab{color:var(--wine);}
+.ex.good{background:linear-gradient(180deg,#fff,var(--paper-3));border:1px solid var(--gold-line);}
+.ex.good .ex-lab{color:var(--gold);}
+.ex .q{font-family:var(--serif);font-size:17px;line-height:1.55;color:var(--ink);white-space:pre-wrap;text-wrap:pretty;}
+.flag{background:rgba(90,46,56,.16);color:var(--wine);border-radius:4px;padding:1px 4px;font-style:normal;}
+.fix{color:#3f6b3f;}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+@media(max-width:680px){.ba{grid-template-columns:1fr;}}
+.ba .ex{margin-top:0;}
+
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--paper-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--wine-2);}
+
+/* fix list */
+.fixlist{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:9px;}
+.fixlist li{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:var(--ink);}
+.fixlist .d{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex:none;margin-top:8px;}
+
+.rule-mark{display:flex;align-items:center;gap:14px;margin:54px 0 0;}
+.rule-mark::before,.rule-mark::after{content:"";height:1px;background:var(--line);flex:1;}
+.rule-mark .diamond{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex:none;}
+
+.footnote{margin-top:40px;font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink-2);text-align:center;text-wrap:pretty;line-height:1.5;}
+
+@media(max-width:680px){
+  .wrap{padding:44px 22px 100px;}
+  .summary{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#F1EBDF"/>
+    <circle cx="50" cy="44" r="17" fill="none" stroke="#5A2E38" stroke-width="2.2"/>
+    <line x1="62" y1="56" x2="74" y2="68" stroke="#5A2E38" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="44" y1="44" x2="56" y2="44" stroke="#AE8A52" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<div class="wrap">
+
+  <div class="brand">
+    <div class="gem"></div>
+    <div>
+      <div class="brand-name">Clínica Dra. Fernanda Cristófoli</div>
+      <div class="brand-sub">Apoio estratégico de atendimento</div>
+    </div>
+  </div>
+
+  <div class="eyebrow">Auditoria · Mensagens padrão</div>
+  <h1 class="title">O que precisa ser<br />corrigido hoje</h1>
+  <p class="lead">Revisão das <b>14 mensagens</b> em uso — 6 manuais e 8 automações. O objetivo aqui não é reescrever o tom (isso vem depois): é apontar <b>o que está objetivamente errado, inconsistente ou arriscado</b> antes de qualquer melhoria de emoção.</p>
+
+  <p class="diag">A leitura geral confirma o diagnóstico: as mensagens carregam a informação certa, mas são frias e transacionais — e algumas, do jeito que estão, não chegam ao paciente como deveriam.</p>
+
+  <div class="summary">
+    <div class="tile t-crit">
+      <div class="num">4</div>
+      <div class="lab">Erros críticos<br />que quebram o envio</div>
+    </div>
+    <div class="tile t-inc">
+      <div class="num">5</div>
+      <div class="lab">Inconsistências<br />de padrão</div>
+    </div>
+    <div class="tile t-risk">
+      <div class="num">5</div>
+      <div class="lab">Riscos de<br />credibilidade</div>
+    </div>
+    <div class="tile t-tone">
+      <div class="num">14</div>
+      <div class="lab">Mensagens sem<br />emoção (todas)</div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 1 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">Erros que quebram o envio</h2>
+  </div>
+  <p class="sec-lead">Prioridade máxima. Não são questões de estilo — são falhas que fazem a mensagem chegar errada ou incompleta ao paciente. Corrigir antes de tudo.</p>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag crit">Erro crítico</span>
+      <span class="find-where"><b>Automação — Agendamento confirmado</b> · WhatsApp</span>
+    </div>
+    <h3>As variáveis estão sem chaves — vai enviar o texto literal</h3>
+    <p>A mensagem usa <code>Primeiro nome do paciente</code>, <code>Data do agendamento</code> e <code>Hora do agendamento</code> <b>sem as chaves</b> <code>{ }</code>. O sistema só substitui o que está entre chaves, então o paciente recebe a frase exatamente como escrita — com as palavras "Primeiro nome do paciente" no lugar do nome dele.</p>
+    <div class="ba">
+      <div class="ex bad">
+        <span class="ex-lab">Como está (errado)</span>
+        <div class="q"><span class="flag">Primeiro nome do paciente</span>, seu atendimento foi confirmado para o dia <span class="flag">Data do agendamento</span>, às <span class="flag">Hora do agendamento</span>.</div>
+      </div>
+      <div class="ex good">
+        <span class="ex-lab">Como deveria ser</span>
+        <div class="q"><span class="fix">{Primeiro nome do paciente}</span>, seu atendimento foi confirmado para o dia <span class="fix">{Data do agendamento}</span>, às <span class="fix">{Hora do agendamento}</span>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag crit">Erro crítico</span>
+      <span class="find-where"><b>Automação — Agendamento cancelado</b> · WhatsApp</span>
+    </div>
+    <h3>Mesmo problema: variáveis sem chaves</h3>
+    <p>Idêntico ao caso anterior. <code>Primeiro nome do paciente</code>, <code>Data do agendamento</code> e <code>Hora do agendamento</code> aparecem como texto comum. O paciente lê uma mensagem despersonalizada confirmando o cancelamento — o pior momento possível para um erro desses.</p>
+    <div class="ex bad">
+      <span class="ex-lab">Como está (errado)</span>
+      <div class="q"><span class="flag">Primeiro nome do paciente</span>, conforme solicitado, seu atendimento marcado para o dia <span class="flag">Data do agendamento</span>, às <span class="flag">Hora do agendamento</span>, foi cancelado.</div>
+    </div>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Envolver as três variáveis em chaves: <code>{Primeiro nome do paciente}</code>, <code>{Data do agendamento}</code>, <code>{Hora do agendamento}</code>.</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag crit">Erro crítico</span>
+      <span class="find-where"><b>Automação — Lembrete de agendamento</b> · E-mail</span>
+    </div>
+    <h3>Chave malformada no nome do paciente</h3>
+    <p>A variável abre e fecha com a mesma chave: <code>{Primeiro nome do paciente{</code> — o fechamento deveria ser <code>}</code>. Dependendo do sistema, isso impede a substituição e o paciente vê o código quebrado logo na primeira linha do e-mail.</p>
+    <div class="ba">
+      <div class="ex bad">
+        <span class="ex-lab">Como está (errado)</span>
+        <div class="q">Olá, <span class="flag">{Primeiro nome do paciente{</span>! Tudo bem?</div>
+      </div>
+      <div class="ex good">
+        <span class="ex-lab">Como deveria ser</span>
+        <div class="q">Olá, <span class="fix">{Primeiro nome do paciente}</span>! Tudo bem?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag crit">Erro crítico</span>
+      <span class="find-where"><b>Automação — Lembrete de agendamento</b> · E-mail</span>
+    </div>
+    <h3>Pede para clicar num link que não existe</h3>
+    <p>O e-mail diz <b>"clique no link abaixo para confirmar ou cancelar sua presença"</b> — mas <b>não há link nenhum</b> depois dessa frase. O paciente fica sem ação possível e a confirmação que a clínica pediu nunca acontece.</p>
+    <div class="ex bad">
+      <span class="ex-lab">Como está (incompleto)</span>
+      <div class="q">Por favor, clique no link abaixo para confirmar ou cancelar sua presença:
+<span class="flag">[ não há link nenhum aqui ]</span>
+Sua confirmação é fundamental para que tudo esteja pronto…</div>
+    </div>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Inserir o link/variável de confirmação logo após a frase — ou remover a frase se não houver link de confirmação configurado.</span></li>
+    </ul>
+  </div>
+
+  <!-- ============ SECTION 2 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Inconsistências de padrão</h2>
+  </div>
+  <p class="sec-lead">Não quebram nada, mas fazem a clínica soar desorganizada. Padronizar tudo de uma vez dá sensação imediata de cuidado e profissionalismo.</p>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag inc">Inconsistência</span>
+      <span class="find-where"><b>Em quase todas as mensagens</b></span>
+    </div>
+    <h3>A assinatura muda toda hora</h3>
+    <p>Há pelo menos <b>cinco formas diferentes</b> de fechar as mensagens. Escolher uma única assinatura e repetir em todas.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span><code>— Equipe Clínica Dra. Fernanda Cristófoli</code> (travessão)</span></li>
+      <li><span class="d"></span><span><code>- Equipe Clínica Dra. Fernanda Cristófoli</code> (hífen)</span></li>
+      <li><span class="d"></span><span><code>- Clínica Dra. Fernanda Cristófoli</code></span></li>
+      <li><span class="d"></span><span><code>Clínica Dra. Fernanda Cristófoli.</code> (com ponto, sem traço)</span></li>
+      <li><span class="d"></span><span>Boas-vindas: <b>nenhuma assinatura</b></span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag inc">Inconsistência</span>
+      <span class="find-where"><b>Saudação inicial</b></span>
+    </div>
+    <h3>Ora nome completo, ora primeiro nome, ora sem nome</h3>
+    <p>As mensagens manuais usam <code>{Nome completo do paciente}</code> — soa formal e estranho ("Olá, Maria Silva Santos!"). As automações usam <code>{Primeiro nome do paciente}</code>, que é mais natural. E aniversário e lembrete de WhatsApp <b>não usam nome algum</b>.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Adotar <code>{Primeiro nome do paciente}</code> como padrão em todas — é mais caloroso e pessoal.</span></li>
+      <li><span class="d"></span><span>Incluir o nome também no aniversário e no lembrete de WhatsApp (hoje começam com "Olá, tudo bem?").</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag inc">Inconsistência</span>
+      <span class="find-where"><b>Mensagens de SMS / E-mail</b></span>
+    </div>
+    <h3>Gênero presumido como feminino</h3>
+    <p>Frases como <b>"Estamos ansiosos para recebê-la"</b> e <b>"para recebê-la da melhor forma"</b> assumem que a paciente é mulher. A maioria pode ser, mas basta um homem para a mensagem soar errada.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Reescrever de forma neutra: <code>"para receber você"</code>, <code>"esperamos por você"</code>.</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag inc">Inconsistência</span>
+      <span class="find-where"><b>Lembrete de agendamento (WhatsApp)</b> · <b>Recuperação de inativo</b></span>
+    </div>
+    <h3>Espaços sobrando no texto</h3>
+    <p>Pequenos deslizes de digitação que aparecem para o paciente: um <b>espaço antes de "Endereço:"</b> no lembrete de WhatsApp e um <b>espaço extra ao final</b> de "Sentimos sua falta na clínica. " na recuperação de inativo.</p>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag inc">Inconsistência</span>
+      <span class="find-where"><b>Não comparecimento</b> vs. <b>Recuperação de horário cancelado</b></span>
+    </div>
+    <h3>Duas mensagens praticamente iguais</h3>
+    <p>As duas dizem quase a mesma coisa: "percebemos que você não pôde comparecer… dar continuidade ao seu plano de tratamento… melhor horário". Há também sobreposição entre <b>Pré-atendimento</b> e o <b>Lembrete de agendamento</b> (ambos: "sem maquiagem, 15 min de antecedência").</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Decidir qual usar em cada situação e diferenciar o texto — ou unificar para não confundir a equipe sobre qual disparar.</span></li>
+    </ul>
+  </div>
+
+  <!-- ============ SECTION 3 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Riscos de credibilidade</h2>
+  </div>
+  <p class="sec-lead">Pontos onde a mensagem, do jeito que está, pode trabalhar contra a clínica — minando confiança ou desperdiçando uma oportunidade.</p>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag risk">Risco</span>
+      <span class="find-where"><b>Automação — Agendamento criado</b> · WhatsApp</span>
+    </div>
+    <h3>Ameaça uma taxa de R$ 300 que nunca foi cobrada</h3>
+    <p>A mensagem avisa que cancelamentos com menos de 48h geram <b>cobrança de R$ 300</b>. Pela sua própria observação no documento, <b>essa taxa nunca foi cobrada</b>. Uma regra anunciada e nunca aplicada enfraquece toda comunicação futura — o paciente aprende que os avisos da clínica não valem.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span><b>Decidir:</b> ou a política passa a ser cumprida de verdade, ou sai da mensagem.</span></li>
+      <li><span class="d"></span><span>Se mantida, suavizar o tom — hoje a frase soa mais ameaça que acordo de cuidado mútuo.</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag risk">Risco</span>
+      <span class="find-where"><b>Automação — Feliz aniversário</b> · WhatsApp</span>
+    </div>
+    <h3>Um aniversário totalmente impessoal</h3>
+    <p>É a mensagem mais "emocional" do conjunto — e ainda assim <b>não cita o nome do paciente em momento nenhum</b>. Um parabéns genérico, que poderia ser de qualquer empresa, no dia mais pessoal do ano. Oportunidade de carinho desperdiçada.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Começar com <code>{Primeiro nome do paciente}</code> e tornar o texto menos protocolar.</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag risk">Risco</span>
+      <span class="find-where"><b>Mensagem com a chave PIX</b></span>
+    </div>
+    <h3>Cobra sem dizer o valor nem pedir comprovante</h3>
+    <p>Envia o CNPJ, mas <b>não informa o valor a ser pago</b>, não diz o nome que aparecerá no PIX (tranquiliza o paciente de que é a clínica certa) e não pede o comprovante. Resultado provável: idas e vindas de mensagens para confirmar dados.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Incluir valor (variável, se houver), nome do recebedor e um pedido gentil de comprovante.</span></li>
+    </ul>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag risk">Risco</span>
+      <span class="find-where"><b>Automação — Boas-vindas</b></span>
+    </div>
+    <h3>Termina no ar, sem assinatura</h3>
+    <p>A primeira impressão do paciente com a clínica encerra em "Estamos felizes em fazer parte do seu cuidado!" — <b>sem assinatura nem despedida</b>. Soa cortado num momento que pede acolhimento.</p>
+  </div>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag risk">Risco</span>
+      <span class="find-where"><b>Pós-atendimento</b></span>
+    </div>
+    <h3>Não diz qual procedimento foi feito nem orienta cuidados</h3>
+    <p>Sendo a mensagem do <b>pós</b>, ela não cita o procedimento realizado nem dá nenhuma orientação de cuidado — exatamente o que o paciente espera receber depois de um atendimento. É só uma gentileza genérica.</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span>Usar <code>{Procedimento}</code> e incluir 1–2 cuidados rápidos do pós (ou link para orientações).</span></li>
+    </ul>
+  </div>
+
+  <!-- ============ SECTION 4 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">O tom — diagnóstico geral</h2>
+  </div>
+  <p class="sec-lead">Esta parte é a que você já sentiu: a falta de emoção. Não é um "erro" pontual, é o padrão das 14 mensagens — e o próximo trabalho.</p>
+
+  <div class="find">
+    <div class="find-top">
+      <span class="tag tone">Observação</span>
+      <span class="find-where"><b>Todas as mensagens</b></span>
+    </div>
+    <h3>Corretas, mas frias e repetitivas</h3>
+    <p>A escrita é funcional e sem erros graves de português, mas <b>distante</b>. Três sinais se repetem:</p>
+    <ul class="fixlist">
+      <li><span class="d"></span><span><b>Muletas repetidas:</b> "Estamos à disposição", "dar continuidade ao seu plano de tratamento", "para o melhor horário" aparecem em quase toda mensagem.</span></li>
+      <li><span class="d"></span><span><b>Foco na clínica, não no paciente:</b> "percebemos que você não pôde comparecer" soa a cobrança; falta calor genuíno e olhar para o que o paciente sente.</span></li>
+      <li><span class="d"></span><span><b>Sem voz própria:</b> poderiam ser de qualquer clínica. Não carregam a personalidade da Dra. Fernanda.</span></li>
+    </ul>
+    <p style="margin-top:16px;">A informação está toda lá — é a base certa. O próximo passo é <b>reescrever com emoção e identidade</b>, mantendo cada dado importante que já existe. Quando você quiser, faço essa reescritura mensagem a mensagem.</p>
+  </div>
+
+  <div class="rule-mark"><span class="diamond"></span></div>
+  <p class="footnote">Corrija primeiro os 4 erros críticos da Seção 01 — esses afetam pacientes reais agora.<br />O resto pode entrar junto da reescritura de tom.</p>
+
+</div>
+</body>
+</html>
