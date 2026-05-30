@@ -377,6 +377,22 @@ ul.steps .n{font-family:var(--serif);font-size:15px;color:var(--gold);flex:none;
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
+<script>
+window.claude = {
+  complete: async function({ messages }) {
+    const res = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+    if (!res.ok) throw new Error("Erro na API: " + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.text;
+  }
+};
+</script>
+
 <script src="kb-data.js"></script>
 <script src="kb-mapa.js"></script>
 <script src="kb-mensagens.js"></script>
